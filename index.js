@@ -2,9 +2,10 @@ const express = require('express');
 const mysql = require('mysql2');
 const path = require('path');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
 
 const app = express();
-const port = 5000;
+const port = 2000;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -30,12 +31,60 @@ db.connect((err) => {
 });
 
 
+// ========================
+// 🔐 LOGIN & SIGNUP ROUTES
+// ========================
+
+// Signup page
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+app.post('/signup', (req, res) => {
+  const { email, password } = req.body;
+
+  const sql = "INSERT INTO users (email, password) VALUES (?, ?)";
+  db.query(sql, [email, password], (err) => {
+    if (err) {
+      console.error(err);
+      return res.send('Error during signup');
+    }
+    res.redirect('/login');
+  });
+});
+
+
+// Login page
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+
+  const sql = "SELECT * FROM users WHERE email = ?";
+  db.query(sql, [email], (err, results) => {
+    if (err) return res.send('Login error');
+    if (results.length === 0) return res.send('User not found');
+
+    const user = results[0];
+    if (password !== user.password) return res.send('Invalid password');
+
+    res.redirect('/add'); // Or res.redirect('/books');
+  });
+});
+
+
+
+// ========================
+// 📚 BOOK ROUTES
+// ========================
 
 // Show list of books
 app.get('/books', (req, res) => {
   db.query('SELECT * FROM books', (err, results) => {
     if (err) return res.send('Error loading books');
-    res.render('list', { books: results });
+    res.render('list', { books: results }); // if you have a books.ejs file
   });
 });
 
@@ -83,7 +132,10 @@ app.get('/delete/:id', (req, res) => {
   });
 });
 
-// Start server
+
+// ========================
+// ✅ START SERVER
+// ========================
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
