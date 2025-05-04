@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Book List</title></head>
+<body>
+  <center>
+  <h1>Books</h1>
+  <a href="/add">Add New Book</a>
+  <table border="1" cellpadding="10">
+    <tr>
+      <th>ID</th><th>Book Name</th><th>Quantity</th><th>Author</th><th>Actions</th>
+    </tr>
+    <% books.forEach(book => { %>
+      <tr>
+        <td><%= book.id %></td>
+        <td><%= book.bookname %></td>
+        <td><%= book.quantity %></td>
+        <td><%= book.author %></td>
+        <td>
+          <a href="/edit/<%= book.id %>">Edit</a> |
+          <a href="/delete/<%= book.id %>" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+      </tr>
+    <% }) %>
+  </table></center>
+</body>
+</html>
